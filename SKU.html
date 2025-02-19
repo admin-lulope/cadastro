@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de SKU - ERP</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ff69b4; /* Fundo pink */
+    }
+    /* Menu ERP Fixo */
+    .menu-container {
+      width: 250px;
+      height: 100vh;
+      background-color: #fff;
+      color: #ff69b4;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    .menu-container img {
+      width: 120px;
+      margin-bottom: 20px;
+    }
+    .menu-container ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .menu-container ul li {
+      width: 100%;
+    }
+    .menu-container ul li a {
+      display: block;
+      padding: 15px;
+      text-decoration: none;
+      color: #ff69b4;
+      font-weight: bold;
+      text-align: center;
+      transition: 0.3s;
+    }
+    .menu-container ul li a:hover {
+      background-color: #ff69b4;
+      color: #fff;
+    }
+    /* Content Area */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      background-color: #f1f1f1;
+      min-height: 100vh;
+      color: #333;
+    }
+    .content label {
+      font-weight: bold;
+    }
+    .content input[type="text"] {
+      padding: 8px;
+      margin: 5px 0;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .content button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    /* Botões específicos */
+    #buscarButton { background-color: #ff69b4; color: #fff; } /* Rosa */
+    /* Botão Adicionar Variação posicionado à direita e laranja */
+    #addVariaButton { 
+      background-color: #ffa500;  /* Laranja */
+      float: right; 
+      margin-bottom: 10px;
+    }
+    /* SKU List */
+    .sku-list {
+      margin-top: 20px;
+    }
+    .sku-list table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+    }
+    .sku-list th, .sku-list td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    .image-cell {
+      text-align: center;
+      vertical-align: middle;
+      padding: 5px;
+    }
+    .image-cell img {
+      max-height: 80px;
+      width: auto;
+      display: block;
+      margin: auto;
+      border-radius: 5px;
+    }
+    .upload-button {
+      background-color: #007bff;
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 12px;
+      display: block;
+      margin: auto;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 50%;
+      border-radius: 5px;
+      text-align: left;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .modal-content button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      color: #fff;
+    }
+    /* Botões do Modal */
+    #salvarModalButton { background-color: #28a745; } /* Verde */
+    .cancel-button { background-color: #dc3545; }  /* Vermelho */
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    /* Botões na Tabela */
+    .edit-button { background-color: #ffa500; } /* Laranja */
+    .delete-button { background-color: #dc3545; } /* Vermelho */
+    /* Label para notificação de cor não cadastrada */
+    #corMsg {
+      color: red;
+      display: none;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menu ERP Fixo -->
+  <div class="menu-container">
+    <img src="https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/icons%2Flogo.png?alt=media&token=09eccf88-c9a9-47da-9373-24b53648d713" alt="Logo da Empresa">
+    <ul>
+      <li><a href="SPU.html">Cadastro de SPU</a></li>
+      <li><a href="SKU.html">Cadastro de SKU</a></li>
+      <li><a href="Categorias.html">Cadastro de Categorias</a></li>
+      <li><a href="Subcategorias.html">Cadastro de Subcategorias</a></li>
+      <li><a href="Cor.html">Cadastro de Cor</a></li>
+    </ul>
+  </div>
+
+  <!-- Conteúdo (Cadastro de SKU) -->
+  <div class="content">
+    <h1>Cadastro de Variações de Produto</h1>
+    <div>
+      <label for="spu">Código SPU:</label>
+      <input type="text" id="spu" placeholder="Código SPU">
+      <button id="buscarButton">Buscar</button>
+    </div>
+    <!-- Botão Adicionar Variação posicionado acima da tabela, à direita -->
+    <button id="addVariaButton" onclick="adicionarVariacao()" style="display:none;">Adicionar Variação</button>
+    <div id="skuList" class="sku-list"></div>
+  </div>
+
+  <!-- Modal para Adicionar/Editar Variação -->
+  <div id="modalVaria" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalVaria()">&times;</span>
+      <h2 id="modalTitle">Adicionar Variação</h2>
+      <label for="modalCodCor">Código da Cor:</label>
+      <input type="text" id="modalCodCor" placeholder="Código da Cor">
+      
+      <label for="modalCor">Cor:</label>
+      <input type="text" id="modalCor" placeholder="Nome da Cor" disabled>
+      <span id="corMsg">Código da cor não cadastrado!</span>
+      
+      <label for="modalInicio">Início:</label>
+      <input type="text" id="modalInicio" placeholder="Início">
+      
+      <label for="modalFim">Fim:</label>
+      <input type="text" id="modalFim" placeholder="Fim">
+      
+      <label for="modalValor">Valor:</label>
+      <input type="text" id="modalValor" placeholder="Valor">
+      
+      <button id="salvarModalButton" onclick="salvarVaria()">Salvar</button>
+      <button class="cancel-button" onclick="fecharModalVaria()">Cancelar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+    import { getStorage, ref as storageRef, uploadBytes } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlLB2K6Sj9kQ9pVAu7rt-Db0jsC-hyvmU",
+      authDomain: "applulope.firebaseapp.com",
+      databaseURL: "https://applulope-default-rtdb.firebaseio.com",
+      projectId: "applulope",
+      storageBucket: "applulope.appspot.com",
+      messagingSenderId: "327504288727",
+      appId: "1:327504288727:web:96e7bfc239cf9337c9c992"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const storage = getStorage(app);
+
+    let spuAtual = "";
+    let skuAtual = "";
+    let modoEdicao = false; // false = adicionar; true = editar
+
+    document.getElementById('buscarButton').addEventListener('click', buscarSPU);
+
+    function buscarSPU() {
+      const spu = document.getElementById('spu').value.trim();
+      if (!spu) return alert("Digite um código SPU.");
+      spuAtual = spu;
+      const spuRef = ref(database, `Produtos/SPU/${spu}`);
+      get(spuRef).then(snapshot => {
+        const skuList = document.getElementById('skuList');
+        skuList.innerHTML = "";
+        if (snapshot.exists()) {
+          const skuData = snapshot.val();
+          if (skuData.SKU) {
+            let htmlContent = `
+              <table>
+                <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>Código Cor</th>
+                    <th>Cor</th>
+                    <th>Grade</th>
+                    <th>Valor</th>
+                    <th>Imagem</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+            Object.keys(skuData.SKU).forEach(skuKey => {
+              const skuItem = skuData.SKU[skuKey];
+              const imgUrl = `https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/CATÁLOGO%2F${skuKey}.jpg?alt=media`;
+              htmlContent += `
+                <tr id="sku-${skuKey}">
+                  <td>${skuKey}</td>
+                  <td>${skuItem.CodCor}</td>
+                  <td>${skuItem.Cor}</td>
+                  <td>${skuItem.Inicio} ao ${skuItem.Fim}</td>
+                  <td>R$ ${skuItem.Valor}</td>
+                  <td class="image-cell">
+                    <img src="${imgUrl}" alt="Imagem de ${skuKey}" 
+                      onerror="this.onerror=null; this.style.display='none'; document.getElementById('upload-${skuKey}').style.display='block';" />
+                    <button id="upload-${skuKey}" class="upload-button" onclick="uploadImagem('${skuKey}')" style="display: none;">
+                      Enviar Imagem
+                    </button>
+                  </td>
+                  <td>
+                    <button class="edit-button" onclick="editarSKU('${spu}', '${skuKey}')">Editar</button>
+                    <button class="delete-button" onclick="excluirSKU('${spu}', '${skuKey}')">Excluir</button>
+                  </td>
+                </tr>`;
+            });
+            htmlContent += `</tbody></table>`;
+            skuList.innerHTML = htmlContent;
+            document.getElementById('addVariaButton').style.display = "block";
+          } else {
+            skuList.innerHTML = "<p>Nenhuma variação encontrada para este SPU.</p>";
+            document.getElementById('addVariaButton').style.display = "block";
+          }
+        } else {
+          skuList.innerHTML = "<p>Este SPU não foi cadastrado.</p>";
+          document.getElementById('addVariaButton').style.display = "none";
+        }
+      });
+    }
+
+    window.excluirSKU = function(spu, sku) {
+      if (confirm(`Deseja excluir a variação ${sku}?`)) {
+        const skuRef = ref(database, `Produtos/SPU/${spu}/SKU/${sku}`);
+        remove(skuRef).then(() => {
+          alert("Variação excluída com sucesso!");
+          buscarSPU();
+        }).catch(error => {
+          alert("Erro ao excluir variação!");
+          console.error(error);
+        });
+      }
+    };
+
+    window.uploadImagem = function(sku) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const storagePath = storageRef(storage, `CATÁLOGO/${sku}.jpg`);
+        uploadBytes(storagePath, file).then(() => {
+          alert('Imagem enviada com sucesso!');
+          buscarSPU();
+        }).catch(error => {
+          alert('Erro ao enviar imagem!');
+          console.error(error);
+        });
+      };
+      input.click();
+    };
+
+    document.getElementById('modalCodCor').addEventListener('input', buscarCorModal);
+    function buscarCorModal() {
+      const codCor = document.getElementById('modalCodCor').value.trim();
+      const corMsg = document.getElementById('corMsg');
+      if (codCor) {
+        const corRef = ref(database, `Produtos/Cor/${codCor}/nome`);
+        get(corRef).then(snapshot => {
+          if (snapshot.exists()) {
+            document.getElementById('modalCor').value = snapshot.val();
+            corMsg.style.display = "none";
+          } else {
+            document.getElementById('modalCor').value = "";
+            corMsg.style.display = "block";
+          }
+        }).catch(error => {
+          console.error("Erro ao buscar cor:", error);
+          document.getElementById('modalCor').value = "";
+          corMsg.style.display = "block";
+        });
+      } else {
+        document.getElementById('modalCor').value = "";
+        corMsg.style.display = "none";
+      }
+    }
+
+    window.adicionarVariacao = function() {
+      modoEdicao = false;
+      skuAtual = "";
+      document.getElementById("modalTitle").innerText = "Adicionar Variação";
+      document.getElementById("modalCodCor").disabled = false;
+      document.getElementById("modalCor").disabled = true;
+      document.getElementById("modalCodCor").value = "";
+      document.getElementById("modalCor").value = "";
+      document.getElementById("modalInicio").value = "";
+      document.getElementById("modalFim").value = "";
+      document.getElementById("modalValor").value = "";
+      document.getElementById("corMsg").style.display = "none";
+      document.getElementById("modalVaria").style.display = "block";
+    };
+
+    window.editarSKU = function(spu, sku) {
+      modoEdicao = true;
+      spuAtual = spu;
+      skuAtual = sku;
+      document.getElementById("modalTitle").innerText = "Editar Variação";
+      const skuRef = ref(database, `Produtos/SPU/${spu}/SKU/${sku}`);
+      get(skuRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const skuData = snapshot.val();
+          document.getElementById("modalCodCor").value = skuData.CodCor || "";
+          document.getElementById("modalCor").value = skuData.Cor || "";
+          document.getElementById("modalInicio").value = skuData.Inicio || "";
+          document.getElementById("modalFim").value = skuData.Fim || "";
+          document.getElementById("modalValor").value = skuData.Valor || "";
+          document.getElementById("modalCodCor").disabled = true;
+          document.getElementById("modalCor").disabled = true;
+          document.getElementById("corMsg").style.display = "none";
+          document.getElementById("modalVaria").style.display = "block";
+        } else {
+          alert("Dados da variação não encontrados!");
+        }
+      });
+    };
+
+    window.fecharModalVaria = function() {
+      document.getElementById("modalVaria").style.display = "none";
+    };
+
+    window.salvarVaria = function() {
+      const codCor = document.getElementById("modalCodCor").value.trim();
+      const cor = document.getElementById("modalCor").value.trim();
+      const inicio = document.getElementById("modalInicio").value.trim();
+      const fim = document.getElementById("modalFim").value.trim();
+      const valor = document.getElementById("modalValor").value.trim();
+      
+      if (!codCor || !inicio || !fim || !valor) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+      if (!cor) {
+        alert("Cor não encontrada, verifique o código da cor!");
+        return;
+      }
+      
+      if (modoEdicao) {
+        const skuRef = ref(database, `Produtos/SPU/${spuAtual}/SKU/${skuAtual}`);
+        update(skuRef, { Inicio: inicio, Fim: fim, Valor: valor }).then(() => {
+          alert("Variação atualizada com sucesso!");
+          fecharModalVaria();
+          buscarSPU();
+        }).catch(error => {
+          alert("Erro ao atualizar variação!");
+          console.error(error);
+        });
+      } else {
+        const novoSku = `${spuAtual}-${codCor}`;
+        const skuRef = ref(database, `Produtos/SPU/${spuAtual}/SKU/${novoSku}`);
+        get(skuRef).then(snapshot => {
+          if (snapshot.exists()) {
+            alert("Variação com este código já cadastrada!");
+            return;
+          } else {
+            set(skuRef, {
+              CodCor: codCor,
+              Cor: cor,
+              Inicio: inicio,
+              Fim: fim,
+              Valor: valor
+            }).then(() => {
+              alert("Variação adicionada com sucesso!");
+              fecharModalVaria();
+              buscarSPU();
+            }).catch(error => {
+              alert("Erro ao adicionar variação!");
+              console.error(error);
+            });
+          }
+        });
+      }
+    };
+  </script>
+
+</body>
+</html>

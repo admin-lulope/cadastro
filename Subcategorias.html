@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Subcategoria - Sistema ERP</title>
+    <style>
+        /* Layout do fundo e menu */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ff69b4; /* Fundo pink */
+        }
+        .menu-container {
+            width: 250px;
+            height: 100vh;
+            background-color: #fff; /* Fundo branco */
+            color: #ff69b4; /* Texto rosa */
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+        .menu-container img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        .menu-container ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .menu-container ul li {
+            width: 100%;
+        }
+        .menu-container ul li a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #ff69b4;
+            font-weight: bold;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .menu-container ul li a:hover {
+            background-color: #ff69b4;
+            color: white;
+        }
+        /* Área de conteúdo à direita */
+        .content {
+            margin-left: 260px; /* Espaço para o menu */
+            padding: 20px;
+            color: white;
+            position: relative;
+        }
+        /* Estilos do formulário de cadastro */
+        .form-container {
+            max-width: 400px;
+            background-color: #fff;
+            color: #000; /* Texto em preto para melhor leitura */
+            margin: 70px auto 0; /* Espaço do topo */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-container h2 {
+            margin-top: 0;
+        }
+        .form-container label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .form-container select,
+        .form-container input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-container .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-container .btn-save {
+            background-color: #28a745;
+            color: white;
+        }
+        .form-container .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+        /* Estilo da lista de subcategorias */
+        .subcategoria-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            background-color: #fff;
+            color: #000;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .btn-delete {
+            background-color: red;
+            color: white;
+            padding: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menu lateral fixo -->
+    <div class="menu-container">
+        <img src="https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/icons%2Flogo.png?alt=media&token=09eccf88-c9a9-47da-9373-24b53648d713" alt="Logo da Empresa">
+        <ul>
+            <li><a href="SPU.html">Cadastro de SPU</a></li>
+            <li><a href="SKU.html">Cadastro de SKU</a></li>
+            <li><a href="Categorias.html">Cadastro de Categorias</a></li>
+            <li><a href="Subcategorias.html">Cadastro de Subcategorias</a></li>
+            <li><a href="Cor.html">Cadastro de Cor</a></li>
+        </ul>
+    </div>
+
+    <!-- Área de conteúdo à direita -->
+    <div class="content">
+        <div class="form-container">
+            <h2>Cadastro de Subcategoria</h2>
+            <form id="subcategoriaForm">
+                <label for="categoria">Categoria</label>
+                <select id="categoria" name="categoria" onchange="buscarSubcategorias()">
+                    <!-- Categorias serão carregadas aqui -->
+                </select>
+                <label for="subcategoria">Subcategoria</label>
+                <input type="text" id="subcategoria" name="subcategoria" required>
+                <div>
+                    <button type="submit" class="btn btn-save">Salvar</button>
+                    <button type="button" class="btn btn-cancel" onclick="limparTela()">Cancelar</button>
+                </div>
+            </form>
+            <h3>Subcategorias Cadastradas</h3>
+            <div id="listaSubcategorias">
+                <!-- Lista de subcategorias será exibida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Inclusão do Firebase SDK (versão 8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "seu-projeto-id.firebaseapp.com",
+            databaseURL: "https://applulope-default-rtdb.firebaseio.com",
+            projectId: "seu-projeto-id",
+            storageBucket: "seu-projeto-id.appspot.com",
+            messagingSenderId: "seu-id",
+            appId: "seu-app-id"
+        };
+        // Inicializar o Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Função para limpar a tela: reseta o formulário e limpa a lista de subcategorias
+        function limparTela() {
+            document.getElementById('subcategoriaForm').reset();
+            document.getElementById('listaSubcategorias').innerHTML = "";
+        }
+
+        // Função para buscar categorias no Firebase
+        function buscarCategorias() {
+            const categoriasRef = firebase.database().ref('Produtos/Categorias');
+            categoriasRef.once('value', (snapshot) => {
+                const categorias = snapshot.val();
+                const selectCategoria = document.getElementById('categoria');
+                selectCategoria.innerHTML = '<option value="">Selecione uma categoria</option>'; // Opção padrão
+                for (let categoria in categorias) {
+                    const option = document.createElement('option');
+                    option.value = categoria;
+                    option.textContent = categoria;
+                    selectCategoria.appendChild(option);
+                }
+            });
+        }
+
+        // Função para buscar subcategorias ao selecionar uma categoria
+        function buscarSubcategorias() {
+            const categoriaSelecionada = document.getElementById('categoria').value;
+            const listaSubcategorias = document.getElementById('listaSubcategorias');
+            listaSubcategorias.innerHTML = ""; // Limpa a lista antes de carregar
+
+            if (categoriaSelecionada) {
+                const subcategoriasRef = firebase.database().ref(`Produtos/Categorias/${categoriaSelecionada}/Subcategoria`);
+                subcategoriasRef.once('value', (snapshot) => {
+                    const subcategorias = snapshot.val();
+                    if (subcategorias) {
+                        for (let key in subcategorias) {
+                            const subcategoriaNome = subcategorias[key].nome;
+                            const div = document.createElement('div');
+                            div.classList.add('subcategoria-item');
+                            div.innerHTML = `
+                                <span>${subcategoriaNome}</span>
+                                <button class="btn-delete" onclick="excluirSubcategoria('${categoriaSelecionada}', '${key}')">Excluir</button>
+                            `;
+                            listaSubcategorias.appendChild(div);
+                        }
+                    } else {
+                        listaSubcategorias.innerHTML = "<p>Nenhuma subcategoria cadastrada.</p>";
+                    }
+                });
+            }
+        }
+
+        // Função para salvar uma nova subcategoria
+        document.getElementById('subcategoriaForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const categoria = document.getElementById('categoria').value;
+            const subcategoria = document.getElementById('subcategoria').value;
+            if (categoria && subcategoria) {
+                // Salva no caminho: Produtos/Categorias/[Categoria]/Subcategoria/[valor]/nome
+                const subcategoriaRef = firebase.database().ref(`Produtos/Categorias/${categoria}/Subcategoria/${subcategoria}/nome`);
+                subcategoriaRef.set(subcategoria).then(() => {
+                    alert('Subcategoria salva com sucesso!');
+                    document.getElementById('subcategoriaForm').reset();
+                    buscarSubcategorias(); // Atualiza a lista
+                }).catch((error) => {
+                    alert('Erro ao salvar subcategoria: ' + error.message);
+                });
+            }
+        });
+
+        // Função para excluir uma subcategoria
+        function excluirSubcategoria(categoria, subcategoria) {
+            if (confirm(`Tem certeza que deseja excluir a subcategoria "${subcategoria}"?`)) {
+                const subcategoriaRef = firebase.database().ref(`Produtos/Categorias/${categoria}/Subcategoria/${subcategoria}`);
+                subcategoriaRef.remove().then(() => {
+                    alert('Subcategoria excluída com sucesso!');
+                    buscarSubcategorias(); // Atualiza a lista
+                }).catch((error) => {
+                    alert('Erro ao excluir subcategoria: ' + error.message);
+                });
+            }
+        }
+
+        // Carrega as categorias ao iniciar a página
+        window.onload = function() {
+            buscarCategorias();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de SPU - Sistema ERP</title>
+  <style>
+    /* Reset de estilos */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ff69b4; /* Fundo pink */
+    }
+
+    /* Menu lateral fixo */
+    .menu-container {
+      width: 250px;
+      height: 100vh;
+      background-color: #fff;
+      color: #ff69b4;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    }
+    .menu-container img {
+      width: 120px;
+      margin-bottom: 20px;
+    }
+    .menu-container ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .menu-container ul li {
+      width: 100%;
+    }
+    .menu-container ul li a {
+      display: block;
+      padding: 15px;
+      text-decoration: none;
+      color: #ff69b4;
+      font-weight: bold;
+      text-align: center;
+      transition: 0.3s;
+    }
+    .menu-container ul li a:hover {
+      background-color: #ff69b4;
+      color: #fff;
+    }
+
+    /* Área de conteúdo à direita */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    /* Formulário de Cadastro de SPU */
+    .form-container {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin: 40px auto;
+    }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      color: #333;
+    }
+    .form-container label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1rem;
+      color: #555;
+    }
+    .form-container input,
+    .form-container select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .form-container button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      background-color: #ff69b4;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .form-container button:hover {
+      background-color: #e60073;
+    }
+    #excluir-btn {
+      background-color: #dc3545;
+    }
+    #excluir-btn:hover {
+      background-color: #c82333;
+    }
+    /* O container de informações só aparece após clicar em "Buscar" */
+    #info-container {
+      display: none;
+    }
+
+    /* Estilos para a lista de SPUs */
+    #spu-list {
+      margin-top: 30px;
+    }
+    #spu-list table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #spu-list th,
+    #spu-list td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    #spu-list th {
+      background-color: #eee;
+    }
+    #spu-list button {
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    #spu-list button.edit-btn {
+      background-color: #007bff;
+      color: #fff;
+      margin-right: 5px;
+    }
+    #spu-list button.edit-btn:hover {
+      background-color: #0056b3;
+    }
+    #spu-list button.delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    #spu-list button.delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      set,
+      update,
+      remove
+    } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlLB2K6Sj9kQ9pVAu7rt-Db0jsC-hyvmU",
+      authDomain: "applulope.firebaseapp.com",
+      databaseURL: "https://applulope-default-rtdb.firebaseio.com",
+      projectId: "applulope",
+      storageBucket: "applulope.appspot.com",
+      messagingSenderId: "327504288727",
+      appId: "1:327504288727:web:96e7bfc239cf9337c9c992"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // Elementos do formulário
+      const spuInput = document.getElementById("spu");
+      const buscarBtn = document.getElementById("buscar-btn");
+      const categoriaSelect = document.getElementById("categoria");
+      const subcategoriaSelect = document.getElementById("subcategoria");
+      const adicionarBtn = document.getElementById("adicionar-btn");
+      const cancelarBtn = document.getElementById("cancelar-btn");
+      const excluirBtn = document.getElementById("excluir-btn");
+      const infoContainer = document.getElementById("info-container");
+      const spuListContainer = document.getElementById("spu-list");
+
+      let spuAtualizar = null;
+
+      // Função para buscar categorias
+      async function fetchCategorias() {
+        const categoriasRef = ref(database, "Produtos/Categorias");
+        const snapshot = await get(categoriasRef);
+        const categorias = snapshot.val() || {};
+        categoriaSelect.innerHTML =
+          '<option value="">Selecione uma Categoria</option>';
+        for (let key in categorias) {
+          if (categorias.hasOwnProperty(key)) {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = categorias[key].nome;
+            categoriaSelect.appendChild(option);
+          }
+        }
+      }
+
+      // Função para buscar subcategorias da categoria selecionada
+      async function fetchSubcategorias(categoria) {
+        const subcategoriaRef = ref(
+          database,
+          `Produtos/Categorias/${categoria}/Subcategoria`
+        );
+        const snapshot = await get(subcategoriaRef);
+        const subcategorias = snapshot.val() || {};
+        subcategoriaSelect.innerHTML =
+          '<option value="">Selecione uma Subcategoria</option>';
+        for (let key in subcategorias) {
+          if (subcategorias.hasOwnProperty(key)) {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = key;
+            subcategoriaSelect.appendChild(option);
+          }
+        }
+      }
+
+      // Função para buscar um SPU (preenche o formulário) no banco de dados
+      async function buscarSPU() {
+        const spu = spuInput.value.trim();
+        if (!spu) return;
+        const spuRef = ref(database, `Produtos/SPU/${spu}`);
+        const snapshot = await get(spuRef);
+        const data = snapshot.val();
+        if (data) {
+          spuAtualizar = spu;
+          categoriaSelect.value = data.Categoria;
+          await fetchSubcategorias(data.Categoria);
+          subcategoriaSelect.value = data.Subcategoria;
+          excluirBtn.style.display = "inline-block";
+          adicionarBtn.textContent = "Atualizar";
+        } else {
+          categoriaSelect.value = "";
+          subcategoriaSelect.value = "";
+          excluirBtn.style.display = "none";
+          adicionarBtn.textContent = "Adicionar";
+        }
+        infoContainer.style.display = "block";
+      }
+
+      // Função para adicionar ou atualizar o SPU
+      async function adicionarSPU() {
+        const spu = spuInput.value.trim();
+        const categoria = categoriaSelect.value;
+        const subcategoria = subcategoriaSelect.value;
+        if (!spu || !categoria || !subcategoria) return;
+        if (spuAtualizar) {
+          const spuRef = ref(database, `Produtos/SPU/${spuAtualizar}`);
+          await update(spuRef, {
+            Categoria: categoria,
+            Subcategoria: subcategoria
+          });
+          alert("SPU atualizado com sucesso!");
+        } else {
+          const spuRef = ref(database, `Produtos/SPU/${spu}`);
+          await set(spuRef, {
+            Categoria: categoria,
+            Subcategoria: subcategoria
+          });
+          alert("SPU adicionado com sucesso!");
+        }
+        // Limpa os campos e oculta o container
+        spuInput.value = "";
+        categoriaSelect.value = "";
+        subcategoriaSelect.innerHTML =
+          '<option value="">Selecione uma Subcategoria</option>';
+        infoContainer.style.display = "none";
+        adicionarBtn.textContent = "Adicionar";
+        spuAtualizar = null;
+        fetchSPUs();
+      }
+
+      // Função para excluir o SPU (via botão do formulário)
+      async function excluirSPU() {
+        const spu = spuInput.value.trim();
+        const spuRef = ref(database, `Produtos/SPU/${spu}`);
+        await remove(spuRef);
+        alert("SPU excluído com sucesso!");
+        spuInput.value = "";
+        infoContainer.style.display = "none";
+        adicionarBtn.textContent = "Adicionar";
+        spuAtualizar = null;
+        fetchSPUs();
+      }
+
+      // Função para buscar e listar todos os SPUs cadastrados
+      async function fetchSPUs() {
+        const spuListRef = ref(database, "Produtos/SPU");
+        const snapshot = await get(spuListRef);
+        const spus = snapshot.val() || {};
+        let html = `<table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="border:1px solid #ccc; padding:8px;">SPU</th>
+              <th style="border:1px solid #ccc; padding:8px;">Categoria</th>
+              <th style="border:1px solid #ccc; padding:8px;">Subcategoria</th>
+              <th style="border:1px solid #ccc; padding:8px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>`;
+        for (let key in spus) {
+          if (spus.hasOwnProperty(key)) {
+            const data = spus[key];
+            html += `<tr>
+              <td style="border:1px solid #ccc; padding:8px;">${key}</td>
+              <td style="border:1px solid #ccc; padding:8px;">${data.Categoria || ""}</td>
+              <td style="border:1px solid #ccc; padding:8px;">${data.Subcategoria || ""}</td>
+              <td style="border:1px solid #ccc; padding:8px;">
+                <button class="edit-btn" onclick="editSPU('${key}')">Editar</button>
+                <button class="delete-btn" onclick="deleteSPU('${key}')">Excluir</button>
+              </td>
+            </tr>`;
+          }
+        }
+        html += `</tbody></table>`;
+        spuListContainer.innerHTML = html;
+      }
+
+      // Funções globais para edição e exclusão via lista
+      window.editSPU = function(spu) {
+        document.getElementById("spu").value = spu;
+        buscarSPU();
+      };
+
+      window.deleteSPU = async function(spu) {
+        if (confirm("Tem certeza que deseja excluir o SPU " + spu + "?")) {
+          const spuRef = ref(database, `Produtos/SPU/${spu}`);
+          await remove(spuRef);
+          alert("SPU excluído com sucesso!");
+          fetchSPUs();
+        }
+      };
+
+      // Eventos
+      buscarBtn.addEventListener("click", buscarSPU);
+      adicionarBtn.addEventListener("click", adicionarSPU);
+      cancelarBtn.addEventListener("click", () => {
+        spuInput.value = "";
+        infoContainer.style.display = "none";
+        adicionarBtn.textContent = "Adicionar";
+        spuAtualizar = null;
+      });
+      excluirBtn.addEventListener("click", excluirSPU);
+      categoriaSelect.addEventListener("change", (e) => {
+        const categoria = e.target.value;
+        if (categoria) {
+          fetchSubcategorias(categoria);
+        } else {
+          subcategoriaSelect.innerHTML =
+            '<option value="">Selecione uma Subcategoria</option>';
+        }
+      });
+
+      fetchCategorias();
+      excluirBtn.style.display = "none";
+      fetchSPUs();
+    });
+  </script>
+</head>
+<body>
+  <!-- Menu lateral fixo -->
+  <div class="menu-container">
+    <img src="https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/icons%2Flogo.png?alt=media&token=09eccf88-c9a9-47da-9373-24b53648d713" alt="Logo da Empresa" />
+    <ul>
+      <li><a href="SPU.html">Cadastro de SPU</a></li>
+      <li><a href="SKU.html">Cadastro de SKU</a></li>
+      <li><a href="Categorias.html">Cadastro de Categorias</a></li>
+      <li><a href="Subcategorias.html">Cadastro de Subcategorias</a></li>
+      <li><a href="Cor.html">Cadastro de Cor</a></li>
+    </ul>
+  </div>
+
+  <!-- Área de conteúdo -->
+  <div class="content">
+    <div class="form-container">
+      <h2>Cadastro de SPU</h2>
+      <label for="spu">SPU:</label>
+      <input type="text" id="spu" placeholder="Digite o SPU" />
+      <button id="buscar-btn">Buscar</button>
+      <div id="info-container">
+        <p>
+          <strong>Categoria:</strong>
+          <select id="categoria">
+            <option value="">Selecione uma Categoria</option>
+          </select>
+        </p>
+        <p>
+          <strong>Subcategoria:</strong>
+          <select id="subcategoria">
+            <option value="">Selecione uma Subcategoria</option>
+          </select>
+        </p>
+        <button id="adicionar-btn">Adicionar</button>
+        <button id="cancelar-btn">Cancelar</button>
+        <button id="excluir-btn" style="display:none;">Excluir SPU</button>
+      </div>
+    </div>
+
+    <!-- Lista de SPUs cadastrados -->
+    <div id="spu-list"></div>
+  </div>
+</body>
+</html>
