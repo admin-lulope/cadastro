@@ -294,7 +294,8 @@
                 <tbody>`;
             Object.keys(skuData.SKU).forEach(skuKey => {
               const skuItem = skuData.SKU[skuKey];
-              const imgUrl = `https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/CATÁLOGO%2F${skuKey}.jpg?alt=media`;
+              // Adiciona um parâmetro de tempo para evitar cache
+              const imgUrl = `https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/CATÁLOGO%2F${skuKey}.jpg?alt=media&t=${Date.now()}`;
               htmlContent += `
                 <tr id="sku-${skuKey}">
                   <td>${skuKey}</td>
@@ -321,6 +322,7 @@
             document.getElementById('addVariaButton').style.display = "block";
           } else {
             skuList.innerHTML = "<p>Nenhuma variação encontrada para este SPU.</p>";
+            // Mesmo sem variações, se o SPU existir, mostra o botão para adicionar
             document.getElementById('addVariaButton').style.display = "block";
           }
         } else {
