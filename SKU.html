@@ -121,6 +121,18 @@
       display: block;
       margin: auto;
     }
+    /* Botões na Tabela */
+    .edit-button { background-color: #ffa500; } /* Laranja */
+    .delete-button { background-color: #dc3545; } /* Vermelho */
+    .delete-image-button { 
+      background-color: #dc3545; /* Vermelho */
+      margin-left: 5px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
     /* Modal Styles */
     .modal {
       display: none;
@@ -168,9 +180,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-    /* Botões na Tabela */
-    .edit-button { background-color: #ffa500; } /* Laranja */
-    .delete-button { background-color: #dc3545; } /* Vermelho */
     /* Label para notificação de cor não cadastrada */
     #corMsg {
       color: red;
@@ -236,7 +245,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
     import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
-    import { getStorage, ref as storageRef, uploadBytes } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js';
+    import { getStorage, ref as storageRef, uploadBytes, deleteObject } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlLB2K6Sj9kQ9pVAu7rt-Db0jsC-hyvmU",
@@ -303,6 +312,7 @@
                   <td>
                     <button class="edit-button" onclick="editarSKU('${spu}', '${skuKey}')">Editar</button>
                     <button class="delete-button" onclick="excluirSKU('${spu}', '${skuKey}')">Excluir</button>
+                    <button class="delete-image-button" onclick="excluirImagem('${skuKey}')">Excluir Imagem</button>
                   </td>
                 </tr>`;
             });
@@ -331,6 +341,17 @@
           console.error(error);
         });
       }
+    };
+
+    window.excluirImagem = function(sku) {
+      const imageRef = storageRef(storage, `CATÁLOGO/${sku}.jpg`);
+      deleteObject(imageRef).then(() => {
+        alert("Imagem excluída com sucesso!");
+        buscarSPU();
+      }).catch(error => {
+        alert("Erro ao excluir imagem!");
+        console.error(error);
+      });
     };
 
     window.uploadImagem = function(sku) {
