@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Sistema ERP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFC0CB; /* Fundo pink */
+        }
+        .menu-container {
+            width: 250px;
+            height: 100vh;
+            background-color: #fff; /* Fundo branco */
+            color: #ff69b4; /* Texto rosa */
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+        .menu-container img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        .menu-container ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .menu-container ul li {
+            width: 100%;
+        }
+        .menu-container ul li a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #ff69b4; /* Texto rosa */
+            font-weight: bold;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .menu-container ul li a:hover {
+            background-color: #ff69b4; /* Fundo rosa no hover */
+            color: white; /* Texto branco no hover */
+        }
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+            color: white; /* Texto branco */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <img src="https://firebasestorage.googleapis.com/v0/b/applulope.appspot.com/o/icons%2Flogo.png?alt=media&token=09eccf88-c9a9-47da-9373-24b53648d713" alt="Logo da Empresa">
+        <ul>
+            <li><a href="SPU.html">Cadastro de SPU</a></li>
+            <li><a href="SKU.html">Cadastro de SKU</a></li>
+            <li><a href="Categorias.html">Cadastro de Categorias</a></li>
+            <li><a href="Subcategorias.html">Cadastro de Subcategorias</a></li>
+            <li><a href="Cor.html">Cadastro de Cor</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Bem-vindo ao Sistema ERP</h1>
+        <p>Escolha uma das opções no menu para continuar.</p>
+    </div>
+
+</body>
+</html>
